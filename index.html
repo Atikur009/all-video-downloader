@@ -308,6 +308,16 @@ async function pasteLink() {
   const input = document.getElementById("url");
   const status = document.getElementById("status");
   try {
+    if (window.AndroidBridge && window.AndroidBridge.getClipboardText) {
+      const t = window.AndroidBridge.getClipboardText();
+      if (t && t.trim()) {
+        input.value = t.trim();
+        status.textContent = "";
+        input.focus();
+        showToast();
+        return;
+      }
+    }
     if (navigator.clipboard && navigator.clipboard.readText) {
       const t = await navigator.clipboard.readText();
       if (t && t.trim()) {

@@ -1,6 +1,7 @@
 package com.atikur.allvideodownloader;
 
 import android.app.DownloadManager;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.webkit.DownloadListener;
+import android.webkit.JavascriptInterface;
 import android.webkit.URLUtil;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -41,6 +43,7 @@ public class MainActivity extends Activity {
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        webView.addJavascriptInterface(new ClipboardBridge(), "AndroidBridge");
 
         webView.setWebViewClient(new Client());
         webView.setDownloadListener(new DownloadListener() {
@@ -88,6 +91,23 @@ public class MainActivity extends Activity {
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
         DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(request);
+    }
+
+    private class ClipboardBridge {
+        @JavascriptInterface
+        public String getClipboardText() {
+            try {
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (cm != null && cm.hasPrimaryClip() && cm.getPrimaryClip() != null
+                        && cm.getPrimaryClip().getItemCount() > 0) {
+                    CharSequence text = cm.getPrimaryClip().getItemAt(0).coerceToText(MainActivity.this);
+                    return text != null ? text.toString() : "";
+                }
+            } catch (Exception e) {
+                // fall through to empty: page uses the browser clipboard path
+            }
+            return "";
+        }
     }
 
     private class Client extends WebViewClient {

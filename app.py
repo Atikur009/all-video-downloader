@@ -171,6 +171,10 @@ def api_formats():
         return jsonify({"error": "Please paste a valid http(s) video link."}), 400
     info, err = get_info(url)
     if info is None:
+        # Hide raw yt-dlp internals from users; keep the detail in server logs.
+        print("formats error for %s: %s" % (url, err), flush=True)
+        if err.startswith("ERROR:"):
+            err = "Couldn't read this video. Please check the link and try another video."
         return jsonify({"error": err}), 422
     return jsonify({
         "title": info.get("title") or "Untitled video",
