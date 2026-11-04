@@ -14,15 +14,15 @@
     min-height: 100vh;
   }
   .wrap { max-width: 640px; margin: 0 auto; padding: 26px 16px 48px; }
-  h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 6px; letter-spacing: -0.5px; color: #221a15; }
-  h1 .grad {
+  .brand {
+    font-size: 17px; font-weight: 800; letter-spacing: -0.2px; margin: 0 0 14px;
     background: linear-gradient(90deg, #ff3d00, #ff9100);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  p.sub { color: #6f5f54; margin: 0 0 22px; font-size: 14.5px; line-height: 1.55; }
-  .box { display: flex; gap: 10px; }
+  h1 { font-size: 25px; line-height: 1.25; margin: 0 0 16px; letter-spacing: -0.3px; color: #221a15; }
+  .inputwrap { position: relative; }
   input {
-    flex: 1; padding: 15px 16px; border-radius: 15px; min-width: 0;
+    width: 100%; padding: 16px 128px 16px 17px; border-radius: 16px;
     border: 1.5px solid #ffd7bd; background: #fff; color: #221a15;
     font-size: 16px; outline: none;
     box-shadow: 0 6px 18px rgba(255, 87, 34, 0.10);
@@ -31,28 +31,38 @@
   button { cursor: pointer; border: 0; font-weight: 700; }
   button:disabled { opacity: .6; cursor: default; }
   #paste {
-    padding: 0 20px; border-radius: 15px; font-size: 16px; white-space: nowrap;
-    background: #fff; color: #f4511e; border: 1.5px solid #ff8a50;
-    box-shadow: 0 6px 18px rgba(255, 87, 34, 0.10);
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 13px; border-radius: 12px; font-size: 15px; white-space: nowrap;
+    background: linear-gradient(135deg, #ff3d00, #ff9100); color: #fff;
+    box-shadow: 0 5px 14px rgba(255, 61, 0, 0.30);
   }
-  #paste:active { background: #fff1e8; }
-  .platforms {
-    display: flex; gap: 8px; margin: 20px 0 2px;
-  }
-  .pf {
-    flex: 1; text-align: center; background: #fff; border: 1px solid #ffe3d3;
-    border-radius: 17px; padding: 11px 2px 9px;
-    box-shadow: 0 5px 16px rgba(255, 87, 34, 0.10);
-  }
-  .pf svg { width: 40px; height: 40px; display: block; margin: 0 auto; }
-  .pf span { display: block; font-size: 11.5px; font-weight: 600; color: #6f5f54; margin-top: 6px; }
+  #paste:active { transform: translateY(-50%) scale(0.97); }
+  #paste svg { width: 18px; height: 18px; display: block; }
   #go {
-    width: 100%; margin-top: 18px; padding: 18px; font-size: 21px; font-weight: 800;
+    width: 100%; margin-top: 16px; padding: 18px; font-size: 21px; font-weight: 800;
     letter-spacing: 0.3px; color: #fff; border-radius: 17px;
     background: linear-gradient(135deg, #ff3d00, #ff9100);
     box-shadow: 0 12px 26px rgba(255, 61, 0, 0.35);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
   }
   #go:active { transform: scale(0.98); }
+  #go svg { width: 23px; height: 23px; display: block; }
+  .tap { font-size: 14.5px; font-weight: 600; color: #6f5f54; margin: 24px 0 12px; }
+  .platforms { display: flex; gap: 8px; }
+  .pf {
+    flex: 1; min-width: 0; text-align: center; background: #fff; border: 1px solid #ffe3d3;
+    border-radius: 17px; padding: 11px 2px 9px;
+    box-shadow: 0 5px 16px rgba(255, 87, 34, 0.10);
+  }
+  .pf svg { width: 38px; height: 38px; display: block; margin: 0 auto; }
+  .pf span { display: block; font-size: 11.5px; font-weight: 600; color: #6f5f54; margin-top: 6px; white-space: nowrap; }
+  @media (max-width: 480px) {
+    .platforms { flex-wrap: wrap; }
+    .pf { flex: 0 0 calc((100% - 24px) / 4); }
+    .pf svg { width: 36px; height: 36px; }
+    .pf span { font-size: 10.5px; }
+  }
   #status { margin: 14px 0; color: #d84315; font-size: 14px; min-height: 20px; }
   .card {
     background: #fff; border: 1px solid #ffe3d3; border-radius: 19px;
@@ -72,39 +82,57 @@
     box-shadow: 0 5px 14px rgba(255, 61, 0, 0.30);
   }
   .foot { color: #9a8a80; font-size: 12px; margin-top: 26px; line-height: 1.6; text-align: center; }
+  #toast {
+    position: fixed; left: 50%; bottom: 30px; z-index: 50;
+    transform: translateX(-50%) translateY(20px);
+    background: #221a15; color: #fff; padding: 12px 20px; border-radius: 999px;
+    font-size: 14px; font-weight: 600; white-space: nowrap; pointer-events: none;
+    opacity: 0; transition: opacity 0.25s, transform 0.25s;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>⬇ <span class="grad">All Video Downloader</span></h1>
-  <p class="sub">Paste a video link from YouTube, Facebook, TikTok, Instagram and more — pick a format and download in one click.</p>
-  <div class="box">
-    <input id="url" type="url" placeholder="Paste video link here…" autocomplete="off">
-    <button id="paste" type="button" onclick="pasteLink()">Paste</button>
+  <div class="brand">⬇ All Video Downloader</div>
+  <h1>Paste a valid link</h1>
+  <div class="inputwrap">
+    <input id="url" type="url" placeholder="Paste link here" autocomplete="off">
+    <button id="paste" type="button" onclick="pasteLink()"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="4" rx="1.5"/><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4h11A1.5 1.5 0 0 1 19 5.5v13A1.5 1.5 0 0 1 17.5 20h-11A1.5 1.5 0 0 1 5 18.5v-13z"/></svg>Paste</button>
   </div>
+  <button id="go" type="button" onclick="fetchFormats()"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>Download</button>
+  <p class="tap">Tap a supported platform to find content:</p>
   <div class="platforms" aria-label="Supported platforms">
     <div class="pf">
       <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="12" width="40" height="24" rx="6" fill="#FF0000"/><polygon points="20,19 31,24 20,29" fill="#ffffff"/></svg>
       <span>YouTube</span>
     </div>
     <div class="pf">
-      <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="40" height="40" rx="9" fill="#1877F2"/><text x="24" y="36" font-size="27" font-weight="800" fill="#ffffff" text-anchor="middle" font-family="Arial, sans-serif">f</text></svg>
-      <span>Facebook</span>
+      <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="40" height="40" rx="9" fill="#000000"/><text x="24" y="33" font-size="26" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, sans-serif">♪</text></svg>
+      <span>TikTok</span>
     </div>
     <div class="pf">
       <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#feda75"/><stop offset="50%" stop-color="#d62976"/><stop offset="100%" stop-color="#962fbf"/></linearGradient></defs><rect x="5" y="5" width="38" height="38" rx="11" fill="url(#igGrad)"/><rect x="14" y="14" width="20" height="20" rx="6" fill="none" stroke="#ffffff" stroke-width="2.5"/><circle cx="24" cy="24" r="4.5" fill="none" stroke="#ffffff" stroke-width="2.5"/><circle cx="31" cy="17" r="1.8" fill="#ffffff"/></svg>
       <span>Instagram</span>
     </div>
     <div class="pf">
-      <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="40" height="40" rx="9" fill="#000000"/><text x="24" y="33" font-size="26" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial, sans-serif">♪</text></svg>
-      <span>TikTok</span>
+      <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="40" height="40" rx="9" fill="#1877F2"/><text x="24" y="36" font-size="27" font-weight="800" fill="#ffffff" text-anchor="middle" font-family="Arial, sans-serif">f</text></svg>
+      <span>Facebook</span>
     </div>
     <div class="pf">
       <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="40" height="40" rx="9" fill="#000000"/><path d="M15 15 L33 33 M33 15 L15 33" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/></svg>
       <span>X</span>
     </div>
+    <div class="pf">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="likeeGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff2d55"/><stop offset="100%" stop-color="#ff6a00"/></linearGradient></defs><rect x="4" y="4" width="40" height="40" rx="11" fill="url(#likeeGrad)"/><path d="M24 34 C12 26 9 19 12 14 C14 11 18 11 20 14 C22 16 23 18 24 20 C25 18 26 16 28 14 C30 11 34 11 36 14 C39 19 36 26 24 34 Z" fill="#ffffff"/></svg>
+      <span>Likee</span>
+    </div>
+    <div class="pf">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="snackGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffb300"/><stop offset="100%" stop-color="#ff6a00"/></linearGradient></defs><rect x="4" y="4" width="40" height="40" rx="11" fill="url(#snackGrad)"/><polygon points="20,15 32,24 20,33" fill="#ffffff"/></svg>
+      <span>SnackVideo</span>
+    </div>
   </div>
-  <button id="go" type="button" onclick="fetchFormats()">Download</button>
   <div id="status"></div>
   <div class="card" id="card">
     <img id="thumb" alt="">
@@ -114,6 +142,7 @@
   </div>
   <p class="foot">Free and open source. Works with public videos. Private, login-only or age-restricted videos may not download. Download only videos you have the right to save.</p>
 </div>
+<div id="toast">pasted from your clipboard</div>
 <script>
 function fmtSize(n) {
   if (!n) return "";
@@ -126,6 +155,13 @@ function fmtDur(s) {
   s = Math.round(s);
   return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
 }
+let toastTimer = null;
+function showToast() {
+  const toast = document.getElementById("toast");
+  toast.classList.add("show");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2000);
+}
 async function pasteLink() {
   const input = document.getElementById("url");
   const status = document.getElementById("status");
@@ -136,6 +172,7 @@ async function pasteLink() {
         input.value = t.trim();
         status.textContent = "";
         input.focus();
+        showToast();
         return;
       }
       input.focus();
