@@ -145,6 +145,17 @@
   .panel p { line-height: 1.7; color: #4a3d35; font-size: 15px; }
   .panel a { color: #ff3d00; font-weight: 700; }
   .back { background: none; color: #ff3d00; font-size: 15px; padding: 0; margin-bottom: 6px; }
+  .howto-card { margin: 0 0 18px; }
+  .howto-card img { width: 100%; border-radius: 16px; display: block; box-shadow: 0 10px 24px rgba(255, 87, 34, 0.20); border: 1px solid #ffe3d3; }
+  .howto-card figcaption { font-size: 16.5px; font-weight: 800; color: #221a15; margin-top: 9px; line-height: 1.5; }
+  .howto-card figcaption span { color: #ff3d00; }
+  .about-hero { text-align: center; margin: 6px 0 14px; }
+  .about-badge { width: 72px; height: 72px; margin: 0 auto 10px; border-radius: 50%; background: linear-gradient(135deg, #ff3d00, #ff9100); color: #fff; font-size: 34px; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 24px rgba(255, 61, 0, 0.35); }
+  .about-name { font-size: 28px; font-weight: 900; letter-spacing: -0.3px; background: linear-gradient(90deg, #ff3d00, #ff9100); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .about-role { font-size: 17px; font-weight: 800; color: #d84315; margin-top: 4px; }
+  .about-bio { font-size: 18px !important; line-height: 1.8 !important; font-weight: 600; color: #3d322b !important; }
+  .about-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .about-chip { background: #fff3ec; border: 1.5px solid #ffb27a; color: #d84315; font-size: 14px; font-weight: 800; padding: 7px 12px; border-radius: 999px; }
   .setrow {
     display: flex; justify-content: space-between; align-items: center; gap: 12px;
     padding: 13px 0; border-top: 1px solid #f3e2d7; font-size: 15px; font-weight: 600;
@@ -222,18 +233,38 @@
   <div id="panel-howto" class="panel" hidden>
     <button type="button" class="back" onclick="showMenu()">← Back</button>
     <h3>How to Download</h3>
-    <ol>
-      <li>Copy the video link from YouTube, Facebook, TikTok or Instagram.</li>
-      <li>Tap Paste (or paste it in the box).</li>
-      <li>Tap the big Download button.</li>
-      <li>Pick a quality from the list (HD, 720p, etc.).</li>
-      <li>The video downloads to your device.</li>
-    </ol>
+    <figure class="howto-card">
+      <img src="howto/step1.jpg" alt="Step 1: Copy the video link">
+      <figcaption><span>Step 1 —</span> Copy the video link from YouTube, Facebook, TikTok or Instagram.</figcaption>
+    </figure>
+    <figure class="howto-card">
+      <img src="howto/step2.jpg" alt="Step 2: Paste the link">
+      <figcaption><span>Step 2 —</span> Paste the link in the box (or tap Paste).</figcaption>
+    </figure>
+    <figure class="howto-card">
+      <img src="howto/step3.jpg" alt="Step 3: Choose quality">
+      <figcaption><span>Step 3 —</span> Tap Download, then pick a quality (HD, 720p, Audio).</figcaption>
+    </figure>
+    <figure class="howto-card">
+      <img src="howto/step4.jpg" alt="Step 4: Download">
+      <figcaption><span>Step 4 —</span> The video downloads to your device.</figcaption>
+    </figure>
   </div>
   <div id="panel-about" class="panel" hidden>
     <button type="button" class="back" onclick="showMenu()">← Back</button>
     <h3>About</h3>
-    <p>Atikur — digital marketing expert since 2021. Previously worked at COE Digital Center and on the Farming Smart Model Village project. Now handles marketing for Genesis Contractors, plus channel growth and Facebook follower services.</p>
+    <div class="about-hero">
+      <div class="about-badge">A</div>
+      <div class="about-name">Atikur</div>
+      <div class="about-role">Digital Marketing Expert — Since 2021</div>
+    </div>
+    <p class="about-bio">Atikur — digital marketing expert since 2021. Previously worked at COE Digital Center and on the Farming Smart Model Village project. Now handles marketing for Genesis Contractors, plus channel growth and Facebook follower services.</p>
+    <div class="about-chips">
+      <span class="about-chip">Digital Marketing Expert</span>
+      <span class="about-chip">Since 2021</span>
+      <span class="about-chip">Genesis Contractors</span>
+      <span class="about-chip">Channel Growth</span>
+    </div>
     <p><a href="https://atikur.cyou" target="_blank" rel="noopener">Visit website: atikur.cyou</a></p>
   </div>
   <div id="panel-settings" class="panel" hidden>
