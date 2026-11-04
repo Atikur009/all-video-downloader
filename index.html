@@ -14,10 +14,29 @@
     min-height: 100vh;
   }
   .wrap { max-width: 640px; margin: 0 auto; padding: 26px 16px 48px; }
-  .brand {
-    font-size: 17px; font-weight: 800; letter-spacing: -0.2px; margin: 0 0 14px;
+  .topbar {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; margin-bottom: 14px;
+  }
+  .hero {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 34px; font-weight: 900; letter-spacing: -0.5px; line-height: 1.12;
+  }
+  .hero .htext {
     background: linear-gradient(90deg, #ff3d00, #ff9100);
     -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero svg { width: 34px; height: 34px; flex: none; display: block; }
+  #menuBtn {
+    flex: none; width: 46px; height: 46px; border-radius: 13px;
+    background: #fff; border: 1.5px solid #ffd7bd;
+    font-size: 25px; line-height: 1; color: #ff3d00;
+    box-shadow: 0 5px 14px rgba(255, 87, 34, 0.12);
+  }
+  #menuBtn:active { transform: scale(0.95); }
+  @media (max-width: 480px) {
+    .hero { font-size: 28px; }
+    .hero svg { width: 30px; height: 30px; }
   }
   h1 { font-size: 25px; line-height: 1.25; margin: 0 0 16px; letter-spacing: -0.3px; color: #221a15; }
   .inputwrap { position: relative; }
@@ -81,6 +100,12 @@
     font-size: 14px; font-weight: 700; white-space: nowrap;
     box-shadow: 0 5px 14px rgba(255, 61, 0, 0.30);
   }
+  .fmt.default-pick { background: #fff3ec; border: 1px solid #ffb27a; border-radius: 12px; padding-left: 10px; padding-right: 10px; }
+  .fmt .badge {
+    background: linear-gradient(135deg, #ff3d00, #ff9100); color: #fff;
+    font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  body.hide-sizes .fmt .size { display: none; }
   .foot { color: #9a8a80; font-size: 12px; margin-top: 26px; line-height: 1.6; text-align: center; }
   #toast {
     position: fixed; left: 50%; bottom: 30px; z-index: 50;
@@ -91,11 +116,52 @@
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #backdrop {
+    position: fixed; inset: 0; background: rgba(34, 26, 21, 0.35);
+    z-index: 60; display: none;
+  }
+  #backdrop.show { display: block; }
+  #drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(320px, 85vw);
+    background: #fff; z-index: 61; transform: translateX(105%);
+    transition: transform 0.25s; box-shadow: -10px 0 30px rgba(0, 0, 0, 0.18);
+    padding: 18px; overflow-y: auto;
+  }
+  #drawer.open { transform: translateX(0); }
+  .drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .drawer-head strong { font-size: 19px; }
+  .drawer-head button {
+    background: #fff3ec; border: 1px solid #ffd7bd; border-radius: 10px;
+    width: 36px; height: 36px; font-size: 16px; color: #d84315;
+  }
+  #menuList button {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; text-align: left; background: #fff7f1; border: 1px solid #ffe3d3;
+    border-radius: 13px; padding: 14px; margin-bottom: 10px; font-size: 16px; color: #221a15;
+  }
+  #menuList button span { color: #ff6a00; font-size: 20px; }
+  .panel h3 { margin: 10px 0; font-size: 18px; }
+  .panel ol { padding-left: 20px; line-height: 1.7; color: #4a3d35; font-size: 15px; }
+  .panel p { line-height: 1.7; color: #4a3d35; font-size: 15px; }
+  .panel a { color: #ff3d00; font-weight: 700; }
+  .back { background: none; color: #ff3d00; font-size: 15px; padding: 0; margin-bottom: 6px; }
+  .setrow {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 13px 0; border-top: 1px solid #f3e2d7; font-size: 15px; font-weight: 600;
+  }
+  .setrow select {
+    font-size: 15px; padding: 8px 10px; border-radius: 10px;
+    border: 1.5px solid #ffd7bd; background: #fff; max-width: 55%;
+  }
+  .setrow input[type=checkbox] { width: 22px; height: 22px; padding: 0; accent-color: #ff3d00; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="brand">⬇ All Video Downloader</div>
+  <header class="topbar">
+    <div class="hero"><svg viewBox="0 0 24 24" fill="none" stroke="#ff3d00" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg><span class="htext">All Video Downloader</span></div>
+    <button id="menuBtn" type="button" aria-label="Open menu" onclick="openMenu()">☰</button>
+  </header>
   <h1>Paste a valid link</h1>
   <div class="inputwrap">
     <input id="url" type="url" placeholder="Paste link here" autocomplete="off">
@@ -142,6 +208,51 @@
   </div>
   <p class="foot">Free and open source. Works with public videos. Private, login-only or age-restricted videos may not download. Download only videos you have the right to save.</p>
 </div>
+<div id="backdrop" onclick="closeMenu()"></div>
+<aside id="drawer" aria-label="Menu">
+  <div class="drawer-head">
+    <strong>Menu</strong>
+    <button type="button" onclick="closeMenu()" aria-label="Close menu">✕</button>
+  </div>
+  <div id="menuList">
+    <button type="button" onclick="showPanel('howto')">How to Download <span>›</span></button>
+    <button type="button" onclick="showPanel('about')">About <span>›</span></button>
+    <button type="button" onclick="showPanel('settings')">Settings <span>›</span></button>
+  </div>
+  <div id="panel-howto" class="panel" hidden>
+    <button type="button" class="back" onclick="showMenu()">← Back</button>
+    <h3>How to Download</h3>
+    <ol>
+      <li>Copy the video link from YouTube, Facebook, TikTok or Instagram.</li>
+      <li>Tap Paste (or paste it in the box).</li>
+      <li>Tap the big Download button.</li>
+      <li>Pick a quality from the list (HD, 720p, etc.).</li>
+      <li>The video downloads to your device.</li>
+    </ol>
+  </div>
+  <div id="panel-about" class="panel" hidden>
+    <button type="button" class="back" onclick="showMenu()">← Back</button>
+    <h3>About</h3>
+    <p>Atikur — digital marketing expert since 2021. Previously worked at COE Digital Center and on the Farming Smart Model Village project. Now handles marketing for Genesis Contractors, plus channel growth and Facebook follower services.</p>
+    <p><a href="https://atikur.cyou" target="_blank" rel="noopener">Visit website: atikur.cyou</a></p>
+  </div>
+  <div id="panel-settings" class="panel" hidden>
+    <button type="button" class="back" onclick="showMenu()">← Back</button>
+    <h3>Settings</h3>
+    <label class="setrow"><span>Default quality</span>
+      <select id="defaultQuality" onchange="saveSettings()">
+        <option value="best">Best available</option>
+        <option value="1080p">1080p HD</option>
+        <option value="720p">720p</option>
+        <option value="480p">480p</option>
+        <option value="audio">Audio only</option>
+      </select>
+    </label>
+    <label class="setrow"><span>Show file sizes</span>
+      <input type="checkbox" id="showSizes" onchange="saveSettings()">
+    </label>
+  </div>
+</aside>
 <div id="toast">pasted from your clipboard</div>
 <script>
 function fmtSize(n) {
@@ -183,6 +294,53 @@ async function pasteLink() {
   }
   input.focus();
 }
+function openMenu() {
+  document.getElementById("drawer").classList.add("open");
+  document.getElementById("backdrop").classList.add("show");
+  showMenu();
+}
+function closeMenu() {
+  document.getElementById("drawer").classList.remove("open");
+  document.getElementById("backdrop").classList.remove("show");
+}
+function showMenu() {
+  document.getElementById("menuList").hidden = false;
+  ["howto", "about", "settings"].forEach(function (p) {
+    document.getElementById("panel-" + p).hidden = true;
+  });
+}
+function showPanel(name) {
+  document.getElementById("menuList").hidden = true;
+  ["howto", "about", "settings"].forEach(function (p) {
+    document.getElementById("panel-" + p).hidden = (p !== name);
+  });
+}
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") closeMenu();
+});
+function loadSettings() {
+  const q = localStorage.getItem("avd_default_quality") || "best";
+  const sel = document.getElementById("defaultQuality");
+  if (sel) sel.value = q;
+  const stored = localStorage.getItem("avd_show_sizes");
+  const show = stored === null ? true : stored === "1";
+  const chk = document.getElementById("showSizes");
+  if (chk) chk.checked = show;
+  document.body.classList.toggle("hide-sizes", !show);
+}
+function saveSettings() {
+  localStorage.setItem("avd_default_quality",
+    document.getElementById("defaultQuality").value);
+  const show = document.getElementById("showSizes").checked;
+  localStorage.setItem("avd_show_sizes", show ? "1" : "0");
+  document.body.classList.toggle("hide-sizes", !show);
+}
+function pickDefaultIndex(formats) {
+  const q = localStorage.getItem("avd_default_quality") || "best";
+  if (q === "best") return 0;
+  if (q === "audio") return formats.findIndex(function (f) { return f.audio_only; });
+  return formats.findIndex(function (f) { return (f.label || "").indexOf(q) === 0; });
+}
 async function fetchFormats() {
   const url = document.getElementById("url").value.trim();
   const status = document.getElementById("status");
@@ -201,11 +359,14 @@ async function fetchFormats() {
     document.getElementById("title").textContent = d.title;
     document.getElementById("meta").textContent =
       [d.uploader, fmtDur(d.duration)].filter(Boolean).join(" • ");
-    document.getElementById("formats").innerHTML = d.formats.map(f => {
+    const defIdx = pickDefaultIndex(d.formats);
+    document.getElementById("formats").innerHTML = d.formats.map(function (f, i) {
       const dl = "/api/download?url=" + encodeURIComponent(url) +
                  "&format_id=" + encodeURIComponent(f.id);
-      return '<div class="fmt"><span class="label">' + f.label +
-        " <small>(" + f.ext.toUpperCase() + ")</small></span>" +
+      const isDef = i === defIdx;
+      return '<div class="fmt' + (isDef ? ' default-pick' : '') + '"><span class="label">' + f.label +
+        " <small>(" + f.ext.toUpperCase() + ")</small>" +
+        (isDef ? ' <span class="badge">Default</span>' : "") + "</span>" +
         '<span class="size">' + fmtSize(f.filesize) + "</span>" +
         '<a href="' + dl + '">Download</a></div>';
     }).join("");
@@ -218,6 +379,7 @@ async function fetchFormats() {
 document.getElementById("url").addEventListener("keydown", function (e) {
   if (e.key === "Enter") fetchFormats();
 });
+loadSettings();
 </script>
 </body>
 </html>
