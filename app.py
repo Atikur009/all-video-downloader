@@ -1,7 +1,9 @@
 """All Video Downloader - Flask backend powered by yt-dlp.
 
 Paste a video link -> list formats (HD / 720p / 480p / audio) -> download.
-Combined formats redirect straight to the media URL (no server storage).
+Combined formats are downloaded server-side with yt-dlp and streamed:
+a redirect would let the phone's downloader fetch the media URL itself,
+and video CDNs block that bare request with 403.
 Video-only HD formats are merged with ffmpeg (imageio-ffmpeg binary) and
 streamed back, with temp files cleaned up afterwards.
 
@@ -16,7 +18,7 @@ import subprocess
 import sys
 import tempfile
 
-from flask import Flask, after_this_request, jsonify, redirect, request, send_file
+from flask import Flask, after_this_request, jsonify, request, send_file
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
@@ -216,20 +218,13 @@ def api_download():
                             and f.get("acodec") not in (None, "none"))
                 break
         if combined:
-            media_url = ""
-            for client in (YT_PLAYER_CLIENTS if is_youtube(url) else [None]):
-                try:
-                    rc, out, _ = run_ytdlp(["-f", fmt, "-g", url],
-                                           player_client=client)
-                except subprocess.TimeoutExpired:
-                    return jsonify({"error": "Timed out."}), 504
-                if rc == 0 and out.strip():
-                    media_url = out.strip().splitlines()[0]
-                    break
-            if media_url.startswith("http"):
-                return redirect(media_url, code=302)
-            return jsonify({"error": "Could not resolve a direct download link."}), 422
-        selector, post = "%s+bestaudio" % fmt, False
+            # Download directly (no redirect): the phone's downloader gets
+            # blocked by the video CDN (403) when it fetches the media URL
+            # itself, but yt-dlp's full request headers pass, so the server
+            # fetches the file and streams it to the phone instead.
+            selector, post = fmt, False
+        else:
+            selector, post = "%s+bestaudio" % fmt, False
 
     # Merge / convert path: download to a temp dir, stream back, clean up.
     tmpdir = tempfile.mkdtemp(prefix="avd_")
@@ -239,7 +234,7 @@ def api_download():
                 "-o", outtmpl, url]
         if post:
             args += ["--extract-audio", "--audio-format", "mp3"]
-        else:
+        elif "+" in selector:
             args += ["--merge-output-format", "mp4"]
         try:
             rc, _, err = 1, "", ""
@@ -260,7 +255,8 @@ def api_download():
             print("download error for %s fmt %s: %s" % (url, fmt, raw), flush=True)
             return jsonify({"error": "Couldn't download this video. Please try again or pick another quality."}), 422
         path = files[0]
-        download_name = "video.mp3" if post else "video.mp4"
+        ext = os.path.splitext(path)[1].lower() or ".mp4"
+        download_name = "video" + ext
 
         @after_this_request
         def _cleanup(response):
