@@ -25,7 +25,7 @@ import java.util.Locale;
 
 public class MainActivity extends Activity {
 
-    private static final String SITE_URL = "https://all-video-downloader-rl30.onrender.com/";
+    private static final String SITE_URL = "https://downloader.atikur.cyou/";
 
     private WebView webView;
     private View loading;
