@@ -36,19 +36,18 @@ def ffmpeg_path():
         return "ffmpeg"
 
 
-def run_ytdlp(args, timeout=YTDLP_TIMEOUT, android=False, retries=2):
+def run_ytdlp(args, timeout=YTDLP_TIMEOUT, player_client=None, retries=2):
     """Run yt-dlp and return (returncode, stdout, stderr). Never uses a shell.
 
     Uses `sys.executable -m yt_dlp` so it works regardless of PATH — the
     pip-installed console script is not always on PATH (e.g. under gunicorn).
+    `player_client` selects a YouTube player client (e.g. "android") used
+    when YouTube's web player bot-blocks datacenter IPs.
     """
     cmd = [sys.executable, "-m", "yt_dlp", "--no-playlist", "--no-warnings",
            "--socket-timeout", "30", "--retries", str(retries)]
-    if android:
-        # YouTube's web player often bot-blocks datacenter IPs (HTTP 429 /
-        # "Sign in to confirm you're not a bot"). The Android player client
-        # usually still answers, so it is the fallback for YouTube links.
-        cmd += ["--extractor-args", "youtube:player_client=android"]
+    if player_client:
+        cmd += ["--extractor-args", "youtube:player_client=%s" % player_client]
     cmd += args
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
@@ -61,18 +60,24 @@ def is_youtube(url):
     return "youtube.com" in url or "youtu.be" in url
 
 
+# YouTube player clients tried in order. YouTube's web player often
+# bot-blocks datacenter IPs (HTTP 429 / "Sign in to confirm you're not a
+# bot"); the Android clients use different player APIs that usually still
+# answer. android_music is a full fallback: it returns a complete format
+# list where the web and app clients are blocked.
+YT_PLAYER_CLIENTS = [None, "android", "android_music"]
+
+
 def get_info(url):
     """Fetch yt-dlp info JSON. Returns (info_dict_or_None, error_message).
 
-    Tries the default (web) client first; for YouTube, falls back to the
-    Android player client when the web client is bot-blocked.
+    For YouTube, tries the player clients in YT_PLAYER_CLIENTS order until
+    one answers; other sites get a single default-client attempt.
     """
     last_err = ""
-    for android in (False, True):
-        if android and not is_youtube(url):
-            break
+    for client in (YT_PLAYER_CLIENTS if is_youtube(url) else [None]):
         try:
-            rc, out, err = run_ytdlp(["-J", url], android=android)
+            rc, out, err = run_ytdlp(["-J", url], player_client=client)
         except subprocess.TimeoutExpired:
             return None, "Timed out while reading that link. Try again."
         if rc == 0 and out.strip():
@@ -212,12 +217,10 @@ def api_download():
                 break
         if combined:
             media_url = ""
-            for android in (False, True):
-                if android and not is_youtube(url):
-                    break
+            for client in (YT_PLAYER_CLIENTS if is_youtube(url) else [None]):
                 try:
                     rc, out, _ = run_ytdlp(["-f", fmt, "-g", url],
-                                           android=android)
+                                           player_client=client)
                 except subprocess.TimeoutExpired:
                     return jsonify({"error": "Timed out."}), 504
                 if rc == 0 and out.strip():
@@ -239,10 +242,12 @@ def api_download():
         else:
             args += ["--merge-output-format", "mp4"]
         try:
-            rc, _, err = run_ytdlp(args, timeout=600, retries=5)
-            if rc != 0 and is_youtube(url):
-                # Web client blocked mid-download: retry via Android client.
-                rc, _, err = run_ytdlp(args, timeout=600, android=True, retries=5)
+            rc, _, err = 1, "", ""
+            for client in (YT_PLAYER_CLIENTS if is_youtube(url) else [None]):
+                rc, _, err = run_ytdlp(args, timeout=600, retries=5,
+                                       player_client=client)
+                if rc == 0:
+                    break
         except subprocess.TimeoutExpired:
             shutil.rmtree(tmpdir, ignore_errors=True)
             return jsonify({"error": "Download timed out."}), 504
