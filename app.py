@@ -36,14 +36,14 @@ def ffmpeg_path():
         return "ffmpeg"
 
 
-def run_ytdlp(args, timeout=YTDLP_TIMEOUT, android=False):
+def run_ytdlp(args, timeout=YTDLP_TIMEOUT, android=False, retries=2):
     """Run yt-dlp and return (returncode, stdout, stderr). Never uses a shell.
 
     Uses `sys.executable -m yt_dlp` so it works regardless of PATH — the
     pip-installed console script is not always on PATH (e.g. under gunicorn).
     """
     cmd = [sys.executable, "-m", "yt_dlp", "--no-playlist", "--no-warnings",
-           "--socket-timeout", "30", "--retries", "2"]
+           "--socket-timeout", "30", "--retries", str(retries)]
     if android:
         # YouTube's web player often bot-blocks datacenter IPs (HTTP 429 /
         # "Sign in to confirm you're not a bot"). The Android player client
@@ -239,10 +239,10 @@ def api_download():
         else:
             args += ["--merge-output-format", "mp4"]
         try:
-            rc, _, err = run_ytdlp(args, timeout=600)
+            rc, _, err = run_ytdlp(args, timeout=600, retries=5)
             if rc != 0 and is_youtube(url):
                 # Web client blocked mid-download: retry via Android client.
-                rc, _, err = run_ytdlp(args, timeout=600, android=True)
+                rc, _, err = run_ytdlp(args, timeout=600, android=True, retries=5)
         except subprocess.TimeoutExpired:
             shutil.rmtree(tmpdir, ignore_errors=True)
             return jsonify({"error": "Download timed out."}), 504
@@ -250,7 +250,10 @@ def api_download():
                  if not f.endswith(".part")]
         if rc != 0 or not files:
             shutil.rmtree(tmpdir, ignore_errors=True)
-            return jsonify({"error": "Download failed: %s" % (err.strip().splitlines() or [""])[-1][:200]}), 422
+            # Hide raw yt-dlp internals from users; keep the detail in logs.
+            raw = (err.strip().splitlines() or [""])[-1][:200]
+            print("download error for %s fmt %s: %s" % (url, fmt, raw), flush=True)
+            return jsonify({"error": "Couldn't download this video. Please try again or pick another quality."}), 422
         path = files[0]
         download_name = "video.mp3" if post else "video.mp4"
 

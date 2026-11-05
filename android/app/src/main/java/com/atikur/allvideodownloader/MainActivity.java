@@ -15,6 +15,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import android.app.Activity;
 
@@ -55,6 +56,9 @@ public class MainActivity extends Activity {
                 String fileName = URLUtil.guessFileName(url, contentDisposition, mimeType);
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
                 request.setTitle("All Video Downloader");
+                request.addRequestHeader("User-Agent", userAgent);
+                request.setAllowedOverMetered(true);
+                request.setAllowedOverRoaming(true);
                 request.setNotificationVisibility(
                         DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 request.setDestinationInExternalPublicDir(
@@ -62,6 +66,7 @@ public class MainActivity extends Activity {
                 DownloadManager manager =
                         (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                 manager.enqueue(request);
+                Toast.makeText(MainActivity.this, "Downloading... check notifications for progress.", Toast.LENGTH_SHORT).show();
             }
         });
         webView.loadUrl(SITE_URL);
@@ -86,11 +91,15 @@ public class MainActivity extends Activity {
         DownloadManager.Request request = new DownloadManager.Request(uri);
         request.setTitle("All Video Downloader");
         request.setDescription("Downloading video");
+        request.addRequestHeader("User-Agent", webView.getSettings().getUserAgentString());
+        request.setAllowedOverMetered(true);
+        request.setAllowedOverRoaming(true);
         request.setNotificationVisibility(
                 DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
         DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(request);
+        Toast.makeText(this, "Downloading... check notifications for progress.", Toast.LENGTH_SHORT).show();
     }
 
     private class ClipboardBridge {
